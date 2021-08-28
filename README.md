@@ -1,1 +1,1 @@
-# Todo with RTK, TS, VITE
+# Todo app with RTK, TS, VITE
