@@ -1,7 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import todoReducer from "../features/todo/todoSlice";
 import { logger } from "./middleware";
-
+import createSagaMiddleware from "redux-saga";
+import rootSaga from "./saga";
 export const loadState = () => {
   try {
     const seria = localStorage.getItem("state");
@@ -24,14 +25,16 @@ export const saveState = (state: any) => {
 };
 
 const configureAppStore = (preloadedState: any) => {
+  const sagaMiddleware = createSagaMiddleware();
   const store = configureStore({
     reducer: {
       todo: todoReducer,
     },
     preloadedState,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(logger, sagaMiddleware),
   });
-
+  sagaMiddleware.run(rootSaga);
   store.subscribe(() => {
     saveState({
       todo: store.getState().todo,
