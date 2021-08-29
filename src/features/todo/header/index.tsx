@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+import { changeDraftAsync } from "../saga";
 import { add, changeDraft, markAllComplete } from "../todoSlice";
 import Title from "./Title";
 import TodoHeader from "./TodoHeader";
@@ -7,14 +8,16 @@ import TodoHeader from "./TodoHeader";
 const ENTER_KEY = 13;
 
 const HeaderTodo = () => {
+  const draftRef = useRef<HTMLInputElement | null>(null);
   const draft = useAppSelector((state) => state.todo.draft);
   const dispatch = useAppDispatch();
 
   const handleSubmit = () => {
-    const val = draft.trim();
+    const val = draftRef?.current?.value.trim();
     if (val) {
       dispatch(add({ name: val }));
       dispatch(changeDraft({ draft: "" }));
+      if (draftRef?.current) draftRef.current.value = "";
     }
   };
 
@@ -24,7 +27,7 @@ const HeaderTodo = () => {
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(changeDraft({ draft: event.target.value }));
+    dispatch(changeDraftAsync({ draft: event.target.value }));
   };
 
   return (
@@ -38,9 +41,10 @@ const HeaderTodo = () => {
           }
         />
         <input
+          ref={draftRef}
           type="text"
           placeholder="What needs to be done?"
-          value={draft}
+          defaultValue={draft}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
         />
